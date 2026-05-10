@@ -1,941 +1,310 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ModoControle">
-    <link rel="icon" type="image/jpeg" href="logo.jpeg">
-    <link rel="apple-touch-icon" href="logo.jpeg">
-    <title>ModoControle - Gestão de Ganhos</title>
-    <style>
-        :root {
-            --bg-color: #000000;
-            --card-bg: #0f172a;
-            --card-border: #1e293b;
-            --primary: #3b82f6;
-            --success: #10b981;
-            --danger: #f43f5e;
-            --warning: #f59e0b;
-            --uber: #000000;
-            --99: #ffcc00;
-            --particular: #2563eb;
-            --indrive: #00d1b2;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --radius: 20px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding-bottom: 110px;
-            overflow-x: hidden;
-            line-height: 1.5;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        .container {
-            padding: 16px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        header {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-        }
-
-        header h1 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            letter-spacing: -0.025em;
-        }
-
-        .summary-card {
-            padding: 24px;
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .summary-item.full { grid-column: span 2; border-bottom: 1px solid var(--card-border); padding-bottom: 16px; }
-        .summary-item label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-        .summary-item .value { font-size: 1.25rem; font-weight: 700; }
-        .summary-item .value.net { font-size: 2.8rem; color: var(--success); letter-spacing: -0.05em; line-height: 1; margin: 5px 0; }
-
-        .goal-container { width: 52px; height: 52px; }
-        .goal-svg { transform: rotate(-90deg); }
-        .goal-bg { fill: none; stroke: var(--card-border); stroke-width: 5; }
-        .goal-bar { fill: none; stroke: var(--success); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.5s; }
-
-        .section-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin: 28px 0 12px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .btn-platform {
-            padding: 18px 10px;
-            border: none;
-            border-radius: 18px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-platform:active { transform: scale(0.92); filter: brightness(1.2); }
-        .btn-uber { background: #000; color: white; border: 1px solid #333; }
-        .btn-99 { background: var(--99); color: #000; }
-        .btn-indrive { background: var(--indrive); color: #000; }
-        .btn-particular { background: var(--particular); color: white; }
-        .btn-expense { background: var(--danger); color: white; }
-
-        .form-inline {
-            display: none;
-            padding: 24px;
-            margin-top: 15px;
-            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .input-group { margin-bottom: 16px; }
-        .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-        input, select {
-            width: 100%;
-            padding: 16px;
-            background: #0b0f19;
-            border: 2px solid var(--card-border);
-            border-radius: 14px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        input:focus { outline: none; border-color: var(--primary); }
-
-        .btn-save {
-            width: 100%;
-            padding: 18px;
-            background: var(--primary);
-            border: none;
-            border-radius: 16px;
-            color: white;
-            font-weight: 800;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-outline { 
-            background: #1f2937; 
-            border: none; 
-            color: white; 
-            padding: 8px 16px; 
-            border-radius: 12px; 
-            font-size: 0.8rem; 
-            font-weight: 700;
-        }
-
-        .odo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 15px; }
-
-        .eff-card {
-            padding: 24px 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
-
-        .eff-item span { display: block; font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-        .eff-item strong { font-size: 1.2rem; color: var(--text-main); font-weight: 800; }
-
-        .entry-card {
-            padding: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid transparent;
-            margin-bottom: 4px;
-        }
-
-        .entry-info h4 { font-size: 1rem; font-weight: 800; }
-        .entry-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
-        .entry-val { font-weight: 800; font-size: 1.1rem; }
-
-        .type-uber { border-left-color: #fff; background: #000; }
-        .type-99 { border-left-color: var(--99); background: rgba(255, 204, 0, 0.05); }
-        .type-particular { border-left-color: var(--particular); background: rgba(37, 99, 235, 0.05); }
-        .type-indrive { border-left-color: var(--indrive); background: rgba(0, 209, 178, 0.05); }
-        .type-gasto { border-left-color: var(--danger); background: rgba(244, 63, 94, 0.05); }
-
-        .btn-edit-small {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            margin-top: 5px;
-            cursor: pointer;
-        }
-        nav {
-            position: fixed;
-            bottom: 24px;
-            left: 20px;
-            right: 20px;
-            height: 76px;
-            background: #1f2937;
-            border-radius: 28px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-            padding: 0 10px;
-        }
-
-        .nav-item {
-            flex: 1;
-            height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.65rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.2s;
-            gap: 6px;
-            border-radius: 20px;
-        }
-
-        .nav-item.active { color: white; background: var(--primary); }
-        .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.5; }
-
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; }
-        .dash-card {
-            padding: 32px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--text-main);
-            border: 2px solid var(--card-border);
-        }
-
-        .icon-box {
-            width: 60px;
-            height: 60px;
-            border-radius: 20px;
-            background: #0b0f19;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .history-item { margin-bottom: 12px; padding: 20px; border-left: 4px solid var(--primary); }
-        .report-tabs { display: flex; background: #1f2937; padding: 5px; border-radius: 16px; gap: 5px; margin-bottom: 24px; }
-        .tab-btn { flex: 1; padding: 14px; border-radius: 12px; border: none; background: none; color: var(--text-muted); font-weight: 800; font-size: 0.8rem; }
-        .tab-btn.active { background: var(--primary); color: white; }
-
-        .btn-end-day { width: 100%; padding: 22px; background: var(--success); color: white; border: none; border-radius: 20px; font-weight: 900; font-size: 1.2rem; margin-top: 40px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); }
-
-        #summary-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-content { max-width: 400px; width: 100%; padding: 40px 24px; text-align: center; border: 3px solid var(--success); }
-        .fuel-warning { color: var(--warning); font-size: 0.75rem; font-weight: 800; margin-top: 8px; display: none; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CIPA — Arouca Fechaduras</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-    <div class="container">
-        <!-- TELA DASHBOARD (INICIAL) -->
-        <div id="page-dashboard" class="page active">
-            <header style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px;">
-                <img src="logo.jpeg" alt="ModoControle" style="width: 180px; height: auto; margin-bottom: 10px;">
-                <div id="current-date" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;"></div>
+    <div class="app-container">
+        <!-- Section: Home -->
+        <section id="home" class="active">
+            <header class="home-header">
+                <div class="logo-container">
+                    <img src="logo.png" alt="Arouca Fechaduras Logo" id="main-logo">
+                </div>
+                <h1>Arouca Fechaduras</h1>
+                <p>CIPA Digital</p>
             </header>
 
-            <div class="dashboard-grid">
-                <div class="dash-card card" onclick="switchPage('today', document.querySelectorAll('.nav-item')[0])">
-                    <div class="icon-box"><svg viewBox="0 0 24 24" stroke="var(--primary)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
-                    <span>Hoje</span>
-                </div>
-                <div class="dash-card card" onclick="switchPage('history', document.querySelectorAll('.nav-item')[1])">
-                    <div class="icon-box"><svg viewBox="0 0 24 24" stroke="var(--success)"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-                    <span>Histórico</span>
-                </div>
-                <div class="dash-card card" onclick="switchPage('report', document.querySelectorAll('.nav-item')[2])">
-                    <div class="icon-box"><svg viewBox="0 0 24 24" stroke="var(--warning)"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
-                    <span>Relatórios</span>
-                </div>
-                <div class="dash-card card" onclick="switchPage('settings', document.querySelectorAll('.nav-item')[3])">
-                    <div class="icon-box"><svg viewBox="0 0 24 24" stroke="var(--text-muted)"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
-                    <span>Ajustes</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- TELA HOJE -->
-        <div id="page-today" class="page">
-            <header>
-                <button class="btn-outline" onclick="switchPage('dashboard', null)">← Menu</button>
-                <div class="goal-container">
-                    <svg class="goal-svg" width="52" height="52">
-                        <circle class="goal-bg" cx="26" cy="26" r="22"></circle>
-                        <circle id="goal-progress" class="goal-bar" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2"></circle>
-                    </svg>
-                </div>
-            </header>
-
-            <div class="summary-card card">
-                <div class="summary-item full">
-                    <label>Lucro do Dia</label>
-                    <div id="today-net" class="value net">R$ 0,00</div>
-                </div>
-                <div class="summary-item">
-                    <label>Ganhos</label>
-                    <div id="today-earnings" class="value">R$ 0,00</div>
-                </div>
-                <div class="summary-item">
-                    <label>Gastos</label>
-                    <div id="today-expenses" class="value" style="color: var(--danger)">R$ 0,00</div>
-                </div>
+            <div class="safety-banner" id="safety-banner">
+                <div class="safety-title">ESTAMOS TRABALHANDO HÁ</div>
+                <div class="safety-days"><span id="safety-current-days">0</span> DIAS</div>
+                <div class="safety-subtitle">SEM ACIDENTES COM PERDA DE TEMPO</div>
+                <div class="safety-record">NOSSO RECORDE É DE <span id="safety-record-days">0</span> DIAS</div>
             </div>
 
-            <div class="section-title">Ganhos por Plataforma</div>
-            <div class="grid-buttons" style="grid-template-columns: repeat(2, 1fr);">
-                <button class="btn-platform btn-uber" onclick="showForm('earning', 'Uber')">Uber</button>
-                <button class="btn-platform btn-99" onclick="showForm('earning', '99')">99</button>
-                <button class="btn-platform btn-indrive" onclick="showForm('earning', 'InDrive')">InDrive</button>
-                <button class="btn-platform btn-particular" onclick="showForm('earning', 'Particular')">Particular</button>
-                <button class="btn-platform btn-expense" onclick="showForm('expense')">Adicionar Gasto</button>
+            <div class="menu-grid">
+                <a href="#denuncia" class="menu-card card-denuncia" data-nav="denuncia">
+                    <i data-lucide="alert-triangle"></i>
+                    <span>Fazer denúncia</span>
+                    <small class="card-counter" id="count-denuncia">0 registros</small>
+                </a>
+                <a href="#sugestoes" class="menu-card card-sugestoes" data-nav="sugestoes">
+                    <i data-lucide="lightbulb"></i>
+                    <span>Sugestões</span>
+                    <small class="card-counter" id="count-sugestao">0 registros</small>
+                </a>
+                <a href="#reclamacoes" class="menu-card card-reclamacoes" data-nav="reclamacoes">
+                    <i data-lucide="message-square"></i>
+                    <span>Reclamações</span>
+                    <small class="card-counter" id="count-reclamacao">0 registros</small>
+                </a>
+                <a href="#acompanhar" class="menu-card card-acompanhar" data-nav="acompanhar">
+                    <i data-lucide="list"></i>
+                    <span>Acompanhar</span>
+                    <small class="card-counter" id="count-total">Ver todos</small>
+                </a>
             </div>
+        </section>
 
-            <div id="form-earning" class="form-inline card">
-                <h3 id="earning-title" style="margin-bottom: 20px;">Novo Ganho</h3>
-                <div class="input-group">
-                    <label>Valor Recebido (R$)</label>
-                    <input type="number" id="earn-value" step="0.01" inputmode="decimal">
-                </div>
-                <button class="btn-save" onclick="saveEarning()">Adicionar Ganhos</button>
-                <p onclick="hideForms()" style="text-align:center; margin-top:15px; font-size:0.8rem; color:var(--text-muted)">Cancelar</p>
-            </div>
-
-            <div id="form-expense" class="form-inline card">
-                <h3 style="margin-bottom: 20px;">Novo Gasto</h3>
-                <div class="input-group">
-                    <label>Tipo</label>
-                    <select id="exp-type">
-                        <option value="Combustível">Combustível</option>
-                        <option value="Manutenção">Manutenção</option>
-                        <option value="Alimentação">Alimentação</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Valor (R$)</label>
-                    <input type="number" id="exp-value" step="0.01" inputmode="decimal">
-                </div>
-                <button class="btn-save" onclick="saveExpense()">Confirmar Gasto</button>
-                <p onclick="hideForms()" style="text-align:center; margin-top:15px; font-size:0.8rem; color:var(--text-muted)">Cancelar</p>
-            </div>
-
-            <div class="section-title">Quilometragem</div>
-            <div class="odo-grid">
-                <div class="input-group">
-                    <label>KM Inicial</label>
-                    <input type="number" id="km-start" oninput="updateKmStats()" inputmode="numeric">
-                </div>
-                <div class="input-group">
-                    <label>KM Final</label>
-                    <input type="number" id="km-end" oninput="updateKmStats()" inputmode="numeric">
-                </div>
-            </div>
-
-            <div class="eff-card card">
-                <div class="eff-item">
-                    <span>KM Rodados</span>
-                    <strong id="stat-total-km">0.0</strong>
-                </div>
-                <div class="eff-item">
-                    <span>Custo/KM</span>
-                    <strong id="stat-cost-km">R$ 0,00</strong>
-                    <div id="fuel-warning" class="fuel-warning">⚠️ Gasto Alto</div>
-                </div>
-                <div class="eff-item">
-                    <span>Ganhos/KM</span>
-                    <strong id="stat-earn-km">R$ 0,00</strong>
-                </div>
-            </div>
-
-            <div class="section-title">Atividades</div>
-            <div id="today-list" class="scroll-list"></div>
-
-            <button class="btn-end-day" onclick="endDay()">ENCERRAR O DIA</button>
-        </div>
-
-        <!-- OUTRAS TELAS -->
-        <div id="page-history" class="page">
-            <header>
-                <button class="btn-outline" onclick="switchPage('dashboard', null)">← Menu</button>
-                <h1>Histórico</h1>
-            </header>
-            
-            <div id="fuel-summary-card" class="card" style="padding: 20px; margin-bottom: 24px; border-color: var(--primary); background: rgba(59, 130, 246, 0.05);">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="icon-box" style="background: var(--primary); width: 48px; height: 48px;">
-                        <svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M17 10h4a2 2 0 0 1 2 2v10M7 10h6M7 14h6M19 14h2M12 22V6"/></svg>
-                    </div>
-                    <div>
-                        <label style="display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Total Gasto em Combustível</label>
-                        <div id="total-fuel-value" style="font-size: 1.5rem; font-weight: 900; color: var(--primary);">R$ 0,00</div>
-                        <div id="total-km-value" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">KM Total: 0.0</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="history-list" class="scroll-list"></div>
-        </div>
-
-        <div id="page-report" class="page">
-            <header>
-                <button class="btn-outline" onclick="switchPage('dashboard', null)">← Menu</button>
-                <h1>Relatórios</h1>
-            </header>
-            <div class="report-tabs">
-                <button class="tab-btn active" onclick="changeReportTab('week', this)">Semana</button>
-                <button class="tab-btn" onclick="changeReportTab('month', this)">Mês</button>
-                <button class="tab-btn" onclick="changeReportTab('total', this)">Total</button>
-            </div>
-            <div id="report-content" class="card" style="padding: 24px;"></div>
-        </div>
-
-        <div id="page-settings" class="page">
-            <header>
-                <button class="btn-outline" onclick="switchPage('dashboard', null)">← Menu</button>
-                <h1>Ajustes</h1>
-            </header>
-            <div class="card" style="padding: 24px; margin-bottom: 24px;">
-                <div class="input-group">
-                    <label>Meta Diária (R$)</label>
-                    <input type="number" id="set-goal" oninput="saveConfig()" inputmode="numeric">
-                </div>
-                <div class="input-group">
-                    <label>Consumo Médio (KM/L)</label>
-                    <input type="number" id="set-cons" oninput="saveConfig()" inputmode="numeric">
-                </div>
-                <div class="input-group">
-                    <label>Preço Combustível (R$)</label>
-                    <input type="number" id="set-price" oninput="saveConfig()" step="0.01" inputmode="decimal">
-                </div>
-                <button class="btn-save" onclick="saveConfig(true)" style="margin-top: 10px;">Salvar Ajustes</button>
-            </div>
-            <button class="btn-save" style="background: var(--success);" onclick="exportWhatsApp()">Gerar Relatório WhatsApp</button>
-            <button class="btn-save" style="background: var(--danger); margin-top: 20px;" onclick="clearAllData()">Limpar Tudo</button>
-        </div>
-    </div>
-
-    <nav>
-        <div class="nav-item active" onclick="switchPage('today', this)">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            Hoje
-        </div>
-        <div class="nav-item" onclick="switchPage('history', this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            Histórico
-        </div>
-        <div class="nav-item" onclick="switchPage('report', this)">
-            <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-            Relatório
-        </div>
-        <div class="nav-item" onclick="switchPage('settings', this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            Ajustes
-        </div>
-    </nav>
-
-    <div id="summary-modal">
-        <div class="modal-content card">
-            <h2 style="color: var(--success); margin-bottom: 20px;">Resumo do Dia</h2>
-            <div id="modal-body" style="text-align: left; margin-bottom: 30px; line-height: 2;"></div>
-            <button class="btn-save" onclick="closeModal()">OK, ENTENDIDO</button>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR HISTÓRICO -->
-    <div id="edit-history-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; padding:20px;">
-        <div class="card" style="width:100%; max-width:400px; padding:25px; border-color:var(--primary)">
-            <h3 style="margin-bottom:20px;">Editar Registro</h3>
-            <input type="hidden" id="edit-index">
-            <div class="input-group">
-                <label>Ganhos Totais (R$)</label>
-                <input type="number" id="edit-total-earn" step="0.01" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>Gastos Totais (R$)</label>
-                <input type="number" id="edit-total-exp" step="0.01" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>KM Rodados</label>
-                <input type="number" id="edit-km" step="0.1" inputmode="decimal">
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:25px;">
-                <button class="btn-outline" onclick="closeEditHistory()" style="padding:15px">Cancelar</button>
-                <button class="btn-save" onclick="saveEditHistory()" style="padding:15px">Salvar</button>
-            </div>
-            <p onclick="deleteHistoryItem()" style="text-align:center; color:var(--danger); margin-top:20px; font-size:0.8rem; font-weight:700">EXCLUIR ESTE DIA</p>
-        </div>
-    </div>
-
-    <script>
-        let state = {
-            currentDay: { earnings: [], expenses: [], kmStart: null, kmEnd: null },
-            history: [],
-            config: { goal: 0, consumption: 0, fuelPrice: 0 }
-        };
-
-        const currentPlatform = { type: '' };
-
-        function init() {
-            const keys = ['modoControleData', 'motoControleData'];
-            let saved = null;
-            for (const key of keys) {
-                saved = localStorage.getItem(key);
-                if (saved) break;
-            }
-            
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data && typeof data === 'object') {
-                        if (data.currentDay) state.currentDay = data.currentDay;
-                        if (data.history) state.history = data.history;
-                        if (data.config) state.config = { ...state.config, ...data.config };
-                    }
-                } catch (e) {
-                    console.error("Erro ao carregar dados salvos:", e);
-                }
-            }
-            
-            updateDate();
-            renderAll();
-            loadConfigs();
-        }
-
-        function updateDate() {
-            const now = new Date();
-            const options = { day: '2-digit', month: 'long' };
-            document.getElementById('current-date').innerText = now.toLocaleDateString('pt-BR', options);
-        }
-
-        function switchPage(pageId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if(el) el.classList.add('active');
-            if (pageId === 'history') renderHistory();
-            if (pageId === 'report') renderReport();
-            window.scrollTo(0,0);
-        }
-
-        function showForm(type, platform = '') {
-            hideForms();
-            const form = document.getElementById(`form-${type}`);
-            form.style.display = 'block';
-            if (platform) {
-                currentPlatform.type = platform;
-                document.getElementById('earning-title').innerText = `${platform}`;
-            }
-            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function hideForms() {
-            document.getElementById('form-earning').style.display = 'none';
-            document.getElementById('form-expense').style.display = 'none';
-        }
-
-        function saveEarning() {
-            const val = parseFloat(document.getElementById('earn-value').value);
-            if (!val) return;
-            state.currentDay.earnings.push({
-                id: Date.now(), platform: currentPlatform.type, value: val,
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            });
-            document.getElementById('earn-value').value = '';
-            hideForms();
-            saveAndSync();
-        }
-
-        function saveExpense() {
-            const type = document.getElementById('exp-type').value;
-            const val = parseFloat(document.getElementById('exp-value').value);
-            if (!val) return;
-            state.currentDay.expenses.push({
-                id: Date.now(), type: type, value: val,
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            });
-            document.getElementById('exp-value').value = '';
-            hideForms();
-            saveAndSync();
-        }
-
-        function saveAndSync() {
-            try {
-                localStorage.setItem('modoControleData', JSON.stringify(state));
-                renderAll();
-            } catch (e) {
-                console.error("Falha ao salvar no LocalStorage:", e);
-            }
-        }
-
-        function renderAll() {
-            const list = document.getElementById('today-list');
-            list.innerHTML = '';
-            let totalEarn = 0, totalExp = 0;
-
-            state.currentDay.earnings.forEach(e => {
-                totalEarn += e.value;
-                const card = document.createElement('div');
-                card.className = `entry-card card type-${e.platform.toLowerCase()}`;
-                card.innerHTML = `<div class="entry-info"><h4>${e.platform}</h4><p>${e.time}</p></div><div class="entry-val">R$ ${e.value.toFixed(2)}</div>`;
-                list.appendChild(card);
-            });
-
-            state.currentDay.expenses.forEach(e => {
-                totalExp += e.value;
-                const card = document.createElement('div');
-                card.className = `entry-card card type-gasto`;
-                card.innerHTML = `<div class="entry-info"><h4>${e.type}</h4><p>${e.time}</p></div><div class="entry-val">- R$ ${e.value.toFixed(2)}</div>`;
-                list.appendChild(card);
-            });
-
-            const net = totalEarn - totalExp;
-            document.getElementById('today-earnings').innerText = `R$ ${totalEarn.toFixed(2)}`;
-            document.getElementById('today-expenses').innerText = `R$ ${totalExp.toFixed(2)}`;
-            document.getElementById('today-net').innerText = `R$ ${net.toFixed(2)}`;
-            document.getElementById('today-net').style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
-            updateKmStats();
-            updateGoalCircle(net);
-        }
-
-        function updateKmStats() {
-            const start = parseFloat(document.getElementById('km-start').value) || 0;
-            const end = parseFloat(document.getElementById('km-end').value) || 0;
-            const diff = Math.max(0, end - start);
-            state.currentDay.kmStart = start;
-            state.currentDay.kmEnd = end;
-            
-            document.getElementById('stat-total-km').innerText = diff.toFixed(1);
-            
-            let totalEarn = state.currentDay.earnings.reduce((acc, curr) => acc + curr.value, 0);
-            let fuelExp = state.currentDay.expenses.filter(e => e.type === 'Combustível').reduce((acc, curr) => acc + curr.value, 0);
-            
-            // Cálculo do custo estimado (baseado nos Ajustes)
-            const estCostPerKm = (state.config.consumption > 0 && state.config.fuelPrice > 0) 
-                ? (state.config.fuelPrice / state.config.consumption) 
-                : 0;
-
-            // Se houver abastecimento hoje, usa o custo real do dia, senão usa o estimado dos ajustes
-            const actualTodayCost = diff > 0 ? fuelExp / diff : 0;
-            const displayCost = actualTodayCost > 0 ? actualTodayCost : estCostPerKm;
-            
-            const earnPerKm = diff > 0 ? totalEarn / diff : 0;
-
-            document.getElementById('stat-cost-km').innerText = `R$ ${displayCost.toFixed(2)}`;
-            document.getElementById('stat-earn-km').innerText = `R$ ${earnPerKm.toFixed(2)}`;
-            
-            if (estCostPerKm > 0 && actualTodayCost > (estCostPerKm * 1.25)) {
-                document.getElementById('fuel-warning').style.display = 'block';
-            } else {
-                document.getElementById('fuel-warning').style.display = 'none';
-            }
-        }
-
-        function updateGoalCircle(currentNet) {
-            const goal = state.config.goal || 0;
-            const circle = document.getElementById('goal-progress');
-            if (goal <= 0) { circle.style.strokeDashoffset = 138.2; return; }
-            const pct = Math.min(100, (currentNet / goal) * 100);
-            circle.style.strokeDashoffset = 138.2 - (138.2 * pct / 100);
-        }
-
-        function endDay() {
-            const start = state.currentDay.kmStart, end = state.currentDay.kmEnd;
-            if (!start || !end || end < start) return alert('Informe a KM corretamente!');
-            const totalEarn = state.currentDay.earnings.reduce((a, b) => a + b.value, 0);
-            const totalExp = state.currentDay.expenses.reduce((a, b) => a + b.value, 0);
-            const km = end - start;
-            state.history.unshift({
-                date: new Date().toLocaleDateString('pt-BR'), timestamp: Date.now(),
-                earnings: [...state.currentDay.earnings], expenses: [...state.currentDay.expenses],
-                totalEarn, totalExp, net: totalEarn - totalExp, kmRodados: km,
-                kmStart: start, kmEnd: end
-            });
-            document.getElementById('modal-body').innerHTML = `<p><b>Lucro:</b> R$ ${(totalEarn-totalExp).toFixed(2)}</p><p><b>Distância:</b> ${km.toFixed(1)} KM</p><p><b>Média:</b> R$ ${(totalEarn/km).toFixed(2)}/KM</p>`;
-            document.getElementById('summary-modal').style.display = 'flex';
-            state.currentDay = { earnings: [], expenses: [], kmStart: null, kmEnd: null };
-            document.getElementById('km-start').value = ''; document.getElementById('km-end').value = '';
-            saveAndSync();
-        }
-
-        function closeModal() { document.getElementById('summary-modal').style.display = 'none'; }
-
-        function renderHistory() {
-            const container = document.getElementById('history-list');
-            const fuelDisplay = document.getElementById('total-fuel-value');
-            const kmDisplay = document.getElementById('total-km-value');
-            container.innerHTML = state.history.length === 0 ? '<p style="text-align:center; padding:20px">Nada por aqui.</p>' : '';
-            
-            let totalFuel = 0;
-            let totalKm = 0;
-
-            state.currentDay.expenses.forEach(e => {
-                if (e.type === 'Combustível') totalFuel += e.value;
-            });
-
-            state.history.forEach((day, index) => {
-                totalKm += day.kmRodados || 0;
-                if (day.expenses) {
-                    day.expenses.forEach(e => {
-                        if (e.type === 'Combustível') totalFuel += e.value;
-                    });
-                }
-
-                const item = document.createElement('div');
-                item.className = 'history-item card';
-                item.innerHTML = `
-                    <div class="history-header">
-                        <div>
-                            <b>${day.date}</b><br>
-                            <small>${day.kmRodados.toFixed(1)} KM percorridos</small><br>
-                            <small style="color:var(--text-muted)">Odômetro: ${day.kmEnd || '---'}</small>
-                        </div>
-                        <div style="text-align: right">
-                            <div style="color:${day.net>=0?'var(--success)':'var(--danger)'}; font-weight:800">R$ ${day.net.toFixed(2)}</div>
-                            <button class="btn-edit-small" onclick="openEditHistory(${index})">Editar</button>
-                        </div>
-                    </div>`;
-                container.appendChild(item);
-            });
-
-            fuelDisplay.innerText = `R$ ${totalFuel.toFixed(2)}`;
-            kmDisplay.innerText = `Distância Total: ${totalKm.toFixed(1)} KM`;
-        }
-
-        function openEditHistory(index) {
-            const day = state.history[index];
-            document.getElementById('edit-index').value = index;
-            document.getElementById('edit-total-earn').value = day.totalEarn;
-            document.getElementById('edit-total-exp').value = day.totalExp;
-            document.getElementById('edit-km').value = day.kmRodados;
-            document.getElementById('edit-history-modal').style.display = 'flex';
-        }
-
-        function closeEditHistory() {
-            document.getElementById('edit-history-modal').style.display = 'none';
-        }
-
-        function saveEditHistory() {
-            const index = document.getElementById('edit-index').value;
-            const earn = parseFloat(document.getElementById('edit-total-earn').value) || 0;
-            const exp = parseFloat(document.getElementById('edit-total-exp').value) || 0;
-            const km = parseFloat(document.getElementById('edit-km').value) || 0;
-
-            state.history[index].totalEarn = earn;
-            state.history[index].totalExp = exp;
-            state.history[index].net = earn - exp;
-            state.history[index].kmRodados = km;
-
-            saveAndSync();
-            closeEditHistory();
-            renderHistory();
-        }
-
-        function deleteHistoryItem() {
-            if (confirm('Tem certeza que deseja excluir este dia permanentemente?')) {
-                const index = document.getElementById('edit-index').value;
-                state.history.splice(index, 1);
-                saveAndSync();
-                closeEditHistory();
-                renderHistory();
-            }
-        }
-
-        function changeReportTab(period, el) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            renderReport(period);
-        }
-
-        function renderReport(period = 'week') {
-            const container = document.getElementById('report-content');
-            const now = new Date();
-            
-            const filtered = state.history.filter(d => {
-                const itemDate = new Date(d.timestamp);
-                if (period === 'week') {
-                    const startOfWeek = new Date(now);
-                    startOfWeek.setDate(now.getDate() - now.getDay());
-                    startOfWeek.setHours(0,0,0,0);
-                    return itemDate >= startOfWeek;
-                }
-                if (period === 'month') {
-                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                    return itemDate >= startOfMonth;
-                }
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-muted)">Sem dados neste período.</p>';
-                return;
-            }
-
-            let km = 0, earn = 0, exp = 0, net = 0;
-            filtered.forEach(d => {
-                km += d.kmRodados;
-                earn += d.totalEarn;
-                exp += d.totalExp || 0;
-                net += d.net;
-            });
-
-            const periodLabel = period === 'week' ? 'esta semana' : (period === 'month' ? 'este mês' : 'todo o período');
-
-            container.innerHTML = `
-                <p style="font-size:0.7rem; color:var(--text-muted); margin-bottom:15px; text-transform:uppercase; font-weight:700">Resumo de ${periodLabel}</p>
-                <div class="stat-row"><span>Ganhos Brutos</span><span>R$ ${earn.toFixed(2)}</span></div>
-                <div class="stat-row"><span>Gastos Totais</span><span style="color:var(--danger)">R$ ${exp.toFixed(2)}</span></div>
-                <div class="stat-row" style="border-top:1px solid var(--card-border); padding-top:10px; margin-top:10px">
-                    <span>LUCRO LÍQUIDO</span><span style="color:var(--success); font-weight:800">R$ ${net.toFixed(2)}</span>
-                </div>
-                <div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:100%; background:var(--success)"></div></div>
-                <div class="stat-row"><span>Distância Percorrida</span><span>${km.toFixed(1)} KM</span></div>
-                <div class="stat-row"><span>Média R$/KM</span><span>R$ ${km > 0 ? (earn/km).toFixed(2) : '0,00'}</span></div>
-                <button class="btn-save" style="background:#25d366; margin-top:20px; font-size:0.9rem; padding:12px;" onclick="exportWhatsApp('${period}')">
-                    Compartilhar no WhatsApp
+        <!-- Section: Fazer Denúncia -->
+        <section id="denuncia">
+            <header class="screen-header bg-red">
+                <button class="back-btn" data-nav="home">
+                    <i data-lucide="arrow-left"></i> Voltar
                 </button>
-            `;
-        }
-
-        function loadConfigs() {
-            const goal = state.config.goal;
-            const cons = state.config.consumption;
-            const price = state.config.fuelPrice;
-
-            document.getElementById('set-goal').value = (goal && goal > 0) ? goal : '';
-            document.getElementById('set-cons').value = (cons && cons > 0) ? cons : '';
-            document.getElementById('set-price').value = (price && price > 0) ? price : '';
-        }
-
-        function saveConfig(showFeedback = false) {
-            const goalVal = parseFloat(document.getElementById('set-goal').value);
-            const consVal = parseFloat(document.getElementById('set-cons').value);
-            const priceVal = parseFloat(document.getElementById('set-price').value);
-
-            state.config.goal = isNaN(goalVal) ? 0 : goalVal;
-            state.config.consumption = isNaN(consVal) ? 0 : consVal;
-            state.config.fuelPrice = isNaN(priceVal) ? 0 : priceVal;
-
-            saveAndSync();
-            if (showFeedback) alert('Ajustes salvos com sucesso!');
-        }
-
-        function exportWhatsApp(period = 'month') {
-            const now = new Date();
-            const filtered = state.history.filter(d => {
-                const itemDate = new Date(d.timestamp);
-                if (period === 'week') {
-                    const startOfWeek = new Date(now);
-                    startOfWeek.setDate(now.getDate() - now.getDay());
-                    startOfWeek.setHours(0,0,0,0);
-                    return itemDate >= startOfWeek;
-                }
-                if (period === 'month') {
-                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                    return itemDate >= startOfMonth;
-                }
-                return true;
-            });
-
-            if (filtered.length === 0) return alert('Sem dados para enviar!');
-
-            let km = 0, earn = 0, exp = 0, net = 0;
-            filtered.forEach(d => {
-                km += d.kmRodados;
-                earn += d.totalEarn;
-                exp += d.totalExp || 0;
-                net += d.net;
-            });
-
-            const label = period === 'week' ? 'Semana Atual' : (period === 'month' ? 'Mês Atual' : 'Histórico Total');
+            </header>
             
-            const message = `📊 *MODOCONTROLE - RELATÓRIO*\n` +
-                `📅 Período: *${label}*\n\n` +
-                `💰 Ganhos Brutos: *R$ ${earn.toFixed(2)}*\n` +
-                `📉 Gastos Totais: *R$ ${exp.toFixed(2)}*\n` +
-                `✅ *LUCRO LÍQUIDO: R$ ${net.toFixed(2)}*\n\n` +
-                `🛣️ Distância: ${km.toFixed(1)} KM\n` +
-                `⛽ Média: R$ ${(km > 0 ? earn/km : 0).toFixed(2)}/KM\n\n` +
-                `_Gerado por ModoControle_`;
+            <div class="screen-title-container">
+                <h2 class="screen-title text-red">
+                    <i data-lucide="alert-circle"></i> Fazer Denúncia
+                </h2>
+            </div>
 
-            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-        }
+            <div class="form-container">
+                <form id="form-denuncia">
+                    <div class="form-group">
+                        <label for="denuncia-nome">Nome</label>
+                        <input type="text" id="denuncia-nome" placeholder="Seu nome completo">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="denuncia-anonimo">
+                            <label for="denuncia-anonimo">Enviar como anônimo</label>
+                        </div>
+                    </div>
 
-        function clearAllData() { if(confirm('Apagar tudo?')) { localStorage.clear(); location.reload(); } }
+                    <div class="form-group">
+                        <label for="denuncia-setor">Setor *</label>
+                        <input type="text" id="denuncia-setor" placeholder="Ex: Produção, Expedição...">
+                        <span class="error-msg">Este campo é obrigatório</span>
+                    </div>
 
-        init();
-    </script>
+                    <div class="form-group">
+                        <label for="denuncia-descricao">Descrição *</label>
+                        <textarea id="denuncia-descricao" rows="5" placeholder="Descreva o que aconteceu..."></textarea>
+                        <span class="error-msg">Este campo é obrigatório</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foto</label>
+                        <div class="photo-upload-container">
+                            <label for="denuncia-foto" class="btn-add-photo">
+                                <i data-lucide="camera"></i> Adicionar foto
+                            </label>
+                            <input type="file" id="denuncia-foto" accept="image/*" capture="environment" style="display: none;">
+                        </div>
+                        <div id="preview-denuncia" class="preview-container">
+                            <img src="" alt="Preview" class="preview-img">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit bg-red">Enviar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Section: Sugestões -->
+        <section id="sugestoes">
+            <header class="screen-header" style="background-color: #EF9F27; color: white;">
+                <button class="back-btn" data-nav="home">
+                    <i data-lucide="arrow-left"></i> Voltar
+                </button>
+            </header>
+            
+            <div class="screen-title-container">
+                <h2 class="screen-title" style="color: #EF9F27;">
+                    <i data-lucide="lightbulb"></i> Sugestão
+                </h2>
+            </div>
+
+            <div class="form-container">
+                <form id="form-sugestao">
+                    <div class="form-group">
+                        <label for="sugestao-nome">Nome</label>
+                        <input type="text" id="sugestao-nome" placeholder="Seu nome">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sugestao-setor">Setor</label>
+                        <input type="text" id="sugestao-setor" placeholder="Seu setor">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sugestao-texto">Sugestão *</label>
+                        <textarea id="sugestao-texto" rows="5" placeholder="Escreva sua sugestão de melhoria..."></textarea>
+                        <span class="error-msg">Este campo é obrigatório</span>
+                    </div>
+
+                    <button type="submit" class="btn-submit" style="background-color: #EF9F27;">Enviar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Section: Reclamações -->
+        <section id="reclamacoes">
+            <header class="screen-header" style="background-color: #D85A30; color: white;">
+                <button class="back-btn" data-nav="home">
+                    <i data-lucide="arrow-left"></i> Voltar
+                </button>
+            </header>
+            
+            <div class="screen-title-container">
+                <h2 class="screen-title" style="color: #D85A30;">
+                    <i data-lucide="message-square"></i> Reclamação
+                </h2>
+            </div>
+
+            <div class="form-container">
+                <form id="form-reclamacao" class="form-container">
+                <div class="form-group">
+                    <label for="reclamacao-nome">Nome</label>
+                    <input type="text" id="reclamacao-nome" placeholder="Seu nome (opcional)">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="reclamacao-anonimo">
+                        <label for="reclamacao-anonimo">Enviar como anônimo</label>
+                    </div>
+                </div>
+
+                    <div class="form-group">
+                        <label for="reclamacao-setor">Setor</label>
+                        <input type="text" id="reclamacao-setor" placeholder="Seu setor">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reclamacao-problema">Problema *</label>
+                        <textarea id="reclamacao-problema" rows="5" placeholder="Descreva o problema..."></textarea>
+                        <span class="error-msg">Este campo é obrigatório</span>
+                    </div>
+
+                    <button type="submit" class="btn-submit" style="background-color: #D85A30;">Enviar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Section: Acompanhar -->
+        <section id="acompanhar">
+            <header class="screen-header bg-blue">
+                <button class="back-btn" data-nav="home">
+                    <i data-lucide="arrow-left"></i> Voltar
+                </button>
+            </header>
+            
+            <div class="screen-title-container">
+                <h2 class="screen-title" style="color: var(--blue-accent)">
+                    <i data-lucide="search"></i> Acompanhar
+                </h2>
+                <p style="font-size: 14px; color: var(--text-muted); margin-top: 5px;">Consulte o status da sua solicitação pelo código.</p>
+                
+                <div class="search-container">
+                    <input type="text" id="tracking-code-input" placeholder="Digite seu código (Ex: A3F9K2M7)">
+                    <button id="btn-consultar" class="btn-submit bg-blue" style="margin-top: 15px;">Consultar</button>
+                </div>
+            </div>
+
+            <div class="list-container" id="tracking-result">
+                <!-- Result will be injected here -->
+            </div>
+        </section>
+
+        <!-- Section: Success (Exibição do Código) -->
+        <section id="success">
+            <div class="success-container">
+                <div class="success-icon">
+                    <i data-lucide="check-circle"></i>
+                </div>
+                <h2 id="success-title">Enviado com sucesso!</h2>
+                <p id="success-msg">Sua solicitação foi registrada.</p>
+
+                <div class="tracking-code-wrapper">
+                    <p class="tracking-code-label">Guarde este código para acompanhar:</p>
+                    <div class="tracking-code-box" id="display-tracking-code">--------</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn-copy" id="btn-copy-code">
+                            <i data-lucide="copy"></i> Copiar código
+                        </button>
+                        <button class="btn-copy" id="btn-copy-reminder" style="border-color: #DFE6E9; color: var(--text-muted);">
+                            <i data-lucide="bell"></i> Salvar lembrete
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-submit bg-blue" data-nav="home">Voltar ao Início</button>
+            </div>
+        </section>
+
+        <!-- Section: Admin -->
+        <section id="admin">
+            <header class="screen-header bg-blue">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <h3 style="margin: 0; font-size: 16px;">Painel Administrativo</h3>
+                    <button class="btn-admin-logout" id="btn-admin-sair">
+                        <i data-lucide="log-out"></i> Sair
+                    </button>
+                </div>
+            </header>
+            
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="admin-denuncias">Denúncias</button>
+                <button class="tab-btn" data-tab="admin-sugestoes">Sugestões</button>
+                <button class="tab-btn" data-tab="admin-reclamacoes">Reclamações</button>
+                <button class="tab-btn" data-tab="admin-config"><i data-lucide="settings"></i></button>
+            </div>
+
+            <div class="admin-stats-container" id="admin-stats">
+                <!-- Stats injected here -->
+            </div>
+
+            <div class="list-container" style="padding-top: 0;">
+                <div class="search-container admin-search" style="margin-bottom: 20px;">
+                    <input type="text" id="admin-search-input" placeholder="Filtrar por número ou setor...">
+                    <i data-lucide="search"></i>
+                </div>
+
+                <div id="admin-denuncias" class="admin-section active"></div>
+                <div id="admin-sugestoes" class="admin-section"></div>
+                <div id="admin-reclamacoes" class="admin-section"></div>
+                <div id="admin-config" class="admin-section">
+                    <div class="admin-card">
+                        <h4>Alterar Senha da CIPA</h4>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label>Senha Atual</label>
+                            <input type="password" id="pass-atual" placeholder="••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>Nova Senha</label>
+                            <input type="password" id="pass-nova" placeholder="••••••">
+                        </div>
+                        <button class="btn-submit bg-blue" id="btn-change-pass">Salvar Nova Senha</button>
+                    </div>
+
+                    <div class="admin-card" style="margin-top: 20px;">
+                        <h4>Placar de Segurança</h4>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label>Dias Sem Acidentes</label>
+                            <input type="number" id="input-safety-current" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Recorde de Dias</label>
+                            <input type="number" id="input-safety-record" placeholder="0">
+                        </div>
+                        <button class="btn-submit" style="background-color: #27AE60;" id="btn-save-safety">Atualizar Placar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="app-footer">
+            <button class="btn-admin-login" id="btn-cipa-area">Acesso CIPA</button>
+        </footer>
+
+        <div id="toast" class="toast">Mensagem de sucesso</div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
