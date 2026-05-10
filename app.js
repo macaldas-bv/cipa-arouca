@@ -99,6 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (section.id === id) section.classList.add('active');
         });
         window.scrollTo(0, 0);
+
+        // Clear tracking info when leaving the tracking screen
+        if (id === 'home') {
+            document.getElementById('tracking-code-input').value = '';
+            document.getElementById('tracking-result').innerHTML = '';
+        }
     }
 
     navButtons.forEach(btn => {
@@ -227,11 +233,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         const results = await Promise.all(queries);
-        const found = results.find(r => r.data && r.data.length > 0)?.data[0];
+        const foundIndex = results.findIndex(r => r.data && r.data.length > 0);
+        const found = foundIndex !== -1 ? results[foundIndex].data[0] : null;
 
         if (!found) {
             trackingResult.innerHTML = '<p class="empty-state">Código não encontrado.</p>';
         } else {
+            const tables = ['denuncias', 'sugestoes', 'reclamacoes'];
+            const currentTable = tables[foundIndex];
             const type = found.id.startsWith('DN') ? 'denuncia' : (found.id.startsWith('SG') ? 'sugestao' : 'reclamacao');
             const desc = found.descricao || found.texto || found.problema || '';
             const isResolvido = found.status === 'Resolvido';
@@ -253,9 +262,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${found.resposta}
                         </div>
                     ` : ''}
+                    ${isResolvido ? '<p style="font-size: 11px; color: var(--red-accent); margin-top: 10px; font-weight: 600;">⚠️ Este registro foi resolvido e foi excluído automaticamente do sistema.</p>' : ''}
                 </div>
             `;
             lucide.createIcons();
+
+            // Auto-delete if resolved - Execute immediately to be sure
+            if (isResolvido) {
+                const { error } = await _supabase.from(currentTable).delete().eq('id', found.id);
+                if (!error) {
+                    console.log(`Registro ${found.id} excluído com sucesso.`);
+                    // Clear input after a small delay so user can see it happened
+                    setTimeout(() => {
+                        trackingInput.value = '';
+                    }, 3000);
+                }
+            }
         }
         btnConsultar.disabled = false;
         btnConsultar.textContent = 'Consultar';
