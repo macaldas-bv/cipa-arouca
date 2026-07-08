@@ -290,15 +290,28 @@
 
                     <div class="admin-card" style="margin-top: 20px;">
                         <h4>Placar de Segurança</h4>
-                        <div class="form-group" style="margin-top: 15px;">
-                            <label>Dias Sem Acidentes</label>
-                            <input type="number" id="input-safety-current" placeholder="0">
+                        
+                        <div style="margin-top: 15px; margin-bottom: 25px;">
+                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">
+                                O contador de dias é <strong>automático</strong>. Em caso de acidente, clique no botão abaixo para zerar a contagem.
+                            </p>
+                            <button class="btn-submit bg-red" id="btn-reset-safety">
+                                <i data-lucide="alert-triangle"></i> Registrar Acidente (Zerar Placar)
+                            </button>
+                        </div>
+
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                        <h5 style="margin: 0 0 15px 0; color: #555; font-size: 14px;">Ajuste Manual</h5>
+
+                        <div class="form-group">
+                            <label>Data do Último Acidente</label>
+                            <input type="date" id="input-safety-last-date">
                         </div>
                         <div class="form-group">
                             <label>Recorde de Dias</label>
                             <input type="number" id="input-safety-record" placeholder="0">
                         </div>
-                        <button class="btn-submit" style="background-color: #27AE60;" id="btn-save-safety">Atualizar Placar</button>
+                        <button class="btn-submit" style="background-color: #27AE60;" id="btn-save-safety">Salvar Ajuste Manual</button>
                     </div>
                 </div>
             </div>

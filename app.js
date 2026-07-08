@@ -27,14 +27,52 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const { data } = await _supabase.from('settings').select('value').eq('key', 'safety_stats').single();
             if (data) {
-                const stats = data.value;
-                document.getElementById('safety-current-days').textContent = stats.current;
-                document.getElementById('safety-record-days').textContent = stats.record;
+                let stats = data.value;
+                let record = stats.record || 0;
+                let lastAccidentDateStr = stats.last_accident_date;
+
+                // Migration from old current format
+                if (!lastAccidentDateStr && stats.current !== undefined) {
+                    const today = new Date();
+                    today.setDate(today.getDate() - parseInt(stats.current));
+                    // Adjust to local timezone format YYYY-MM-DD
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    lastAccidentDateStr = `${year}-${month}-${day}`;
+                    _supabase.from('settings').update({ value: { last_accident_date: lastAccidentDateStr, record: record } }).eq('key', 'safety_stats').then();
+                }
+
+                let currentDays = 0;
+                if (lastAccidentDateStr) {
+                    const [year, month, day] = lastAccidentDateStr.split('-');
+                    const lastDate = new Date(year, month - 1, day);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    
+                    const diffTime = today - lastDate;
+                    if (diffTime >= 0) {
+                        currentDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    }
+
+                    if (currentDays > record) {
+                        record = currentDays;
+                        _supabase.from('settings').update({ value: { last_accident_date: lastAccidentDateStr, record: record } }).eq('key', 'safety_stats').then();
+                    }
+                } else if (stats.current !== undefined) {
+                    currentDays = stats.current;
+                }
+
+                document.getElementById('safety-current-days').textContent = currentDays;
+                document.getElementById('safety-record-days').textContent = record;
                 
-                const inputCurrent = document.getElementById('input-safety-current');
+                const inputLastDate = document.getElementById('input-safety-last-date');
                 const inputRecord = document.getElementById('input-safety-record');
-                if (inputCurrent) inputCurrent.value = stats.current;
-                if (inputRecord) inputRecord.value = stats.record;
+                
+                if (inputLastDate && lastAccidentDateStr) {
+                    inputLastDate.value = lastAccidentDateStr;
+                }
+                if (inputRecord) inputRecord.value = record;
             }
         } catch (err) {
             console.error('Erro ao carregar placar:', err);
@@ -479,14 +517,39 @@ document.addEventListener('DOMContentLoaded', () => {
         } else showToast('Senha atual incorreta!');
     });
 
-    document.getElementById('btn-save-safety').addEventListener('click', async () => {
-        const current = parseInt(document.getElementById('input-safety-current').value || 0);
+    document.getElementById('btn-reset-safety')?.addEventListener('click', async () => {
+        if (confirm('ATENÇÃO: Isso irá zerar o contador de dias sem acidentes. Confirma que houve um acidente?')) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            
+            const record = parseInt(document.getElementById('input-safety-record').value || 0);
+            
+            const { error } = await _supabase.from('settings').update({ value: { last_accident_date: todayStr, record: record } }).eq('key', 'safety_stats');
+            if (error) showToast('Erro ao zerar placar.');
+            else {
+                updateSafetyBoard();
+                showToast('Acidente registrado. Placar zerado.');
+            }
+        }
+    });
+
+    document.getElementById('btn-save-safety')?.addEventListener('click', async () => {
+        const lastDate = document.getElementById('input-safety-last-date').value;
         const record = parseInt(document.getElementById('input-safety-record').value || 0);
-        const { error } = await _supabase.from('settings').update({ value: { current, record } }).eq('key', 'safety_stats');
+        
+        if (!lastDate) {
+            showToast('Por favor, informe a data do último acidente.');
+            return;
+        }
+
+        const { error } = await _supabase.from('settings').update({ value: { last_accident_date: lastDate, record: record } }).eq('key', 'safety_stats');
         if (error) showToast('Erro ao salvar.');
         else {
             updateSafetyBoard();
-            showToast('Placar atualizado!');
+            showToast('Configurações do placar atualizadas!');
         }
     });
 });
